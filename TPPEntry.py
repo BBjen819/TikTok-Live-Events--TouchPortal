@@ -90,6 +90,46 @@ TP_PLUGIN_CATEGORIES = {
         'id': PLUGIN_ID + ".message_5",
         'name' : "TikTokLive Message 5",
     },
+    "Message - 6": {
+        'id': PLUGIN_ID + ".message_6",
+        'name' : "TikTokLive Message 6",
+    },
+    "Message - 7": {
+        'id': PLUGIN_ID + ".message_7",
+        'name' : "TikTokLive Message 7",
+    },
+    "Message - 8": {
+        'id': PLUGIN_ID + ".message_8",
+        'name' : "TikTokLive Message 8",
+    },
+    "Message - 9": {
+        'id': PLUGIN_ID + ".message_9",
+        'name' : "TikTokLive Message 9",
+    },
+    "Message - 10": {
+        'id': PLUGIN_ID + ".message_10",
+        'name' : "TikTokLive Message 10",
+    },
+    "Message - 11": {
+        'id': PLUGIN_ID + ".message_11",
+        'name' : "TikTokLive Message 11",
+    },
+    "Message - 12": {
+        'id': PLUGIN_ID + ".message_12",
+        'name' : "TikTokLive Message 12",
+    },
+    "Message - 13": {
+        'id': PLUGIN_ID + ".message_13",
+        'name' : "TikTokLive Message 13",
+    },
+    "Message - 14": {
+        'id': PLUGIN_ID + ".message_14",
+        'name' : "TikTokLive Message 14",
+    },
+    "Message - 15": {
+        'id': PLUGIN_ID + ".message_15",
+        'name' : "TikTokLive Message 15",
+    },
     'Top 5 Viewers': {
         'id': PLUGIN_ID + ".top_viewer",
         'name' : "TikTokLive Top 5 Viewers",
