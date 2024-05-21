@@ -270,6 +270,12 @@
           "default": ""
         },
         {
+          "id": "gitago.TikTokLive.state.newComment.Comment",
+          "type": "text",
+          "desc": "TikTok | New Comment: Comment",
+          "default": ""
+        },
+        {
           "id": "gitago.TikTokLive.state.newComment.UserID",
           "type": "text",
           "desc": "TikTok | New Comment: UserID",
@@ -618,6 +624,494 @@
       "events": [],
       "connectors": []
     },
+
+{
+      "id": "gitago.TikTokLive.message_6",
+      "name": "TikTokLive Message 6",
+      "actions": [],
+      "states": [
+        {
+          "id": "gitago.TikTokLive.state.message_6.Username",
+          "type": "text",
+          "desc": "TikTok | Message 6 - Username ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_6.Userid",
+          "type": "text",
+          "desc": "TikTok | Message 6 - Userid ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_6.Message",
+          "type": "text",
+          "desc": "TikTok | Message 6 - Message ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_6.Followers",
+          "type": "text",
+          "desc": "TikTok | Message 6 - Followers ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_6.Followerrole",
+          "type": "text",
+          "desc": "TikTok | Message 6 - Followerrole ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_6.Avatar",
+          "type": "text",
+          "desc": "TikTok | Message 6 - Avatar ",
+          "default": ""
+        }
+      ],
+      "events": [],
+      "connectors": []
+    },
+
+
+    {
+      "id": "gitago.TikTokLive.message_7",
+      "name": "TikTokLive Message 7",
+      "actions": [],
+      "states": [
+        {
+          "id": "gitago.TikTokLive.state.message_7.Username",
+          "type": "text",
+          "desc": "TikTok | Message 7 - Username ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_7.Userid",
+          "type": "text",
+          "desc": "TikTok | Message 7 - Userid ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_7.Message",
+          "type": "text",
+          "desc": "TikTok | Message 7 - Message ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_7.Followers",
+          "type": "text",
+          "desc": "TikTok | Message 7 - Followers ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_7.Followerrole",
+          "type": "text",
+          "desc": "TikTok | Message 7 - Followerrole ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_7.Avatar",
+          "type": "text",
+          "desc": "TikTok | Message 7 - Avatar ",
+          "default": ""
+        }
+      ],
+      "events": [],
+      "connectors": []
+    },
+
+
+    {
+      "id": "gitago.TikTokLive.message_8",
+      "name": "TikTokLive Message 8",
+      "actions": [],
+      "states": [
+        {
+          "id": "gitago.TikTokLive.state.message_8.Username",
+          "type": "text",
+          "desc": "TikTok | Message 8 - Username ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_8.Userid",
+          "type": "text",
+          "desc": "TikTok | Message 8 - Userid ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_8.Message",
+          "type": "text",
+          "desc": "TikTok | Message 8 - Message ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_8.Followers",
+          "type": "text",
+          "desc": "TikTok | Message 8 - Followers ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_8.Followerrole",
+          "type": "text",
+          "desc": "TikTok | Message 8 - Followerrole ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_8.Avatar",
+          "type": "text",
+          "desc": "TikTok | Message 8 - Avatar ",
+          "default": ""
+        }
+      ],
+      "events": [],
+      "connectors": []
+    },
+
+
+    {
+      "id": "gitago.TikTokLive.message_9",
+      "name": "TikTokLive Message 9",
+      "actions": [],
+      "states": [
+        {
+          "id": "gitago.TikTokLive.state.message_9.Username",
+          "type": "text",
+          "desc": "TikTok | Message 9 - Username ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_9.Userid",
+          "type": "text",
+          "desc": "TikTok | Message 9 - Userid ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_9.Message",
+          "type": "text",
+          "desc": "TikTok | Message 9 - Message ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_9.Followers",
+          "type": "text",
+          "desc": "TikTok | Message 9 - Followers ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_9.Followerrole",
+          "type": "text",
+          "desc": "TikTok | Message 9 - Followerrole ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_9.Avatar",
+          "type": "text",
+          "desc": "TikTok | Message 9 - Avatar ",
+          "default": ""
+        }
+      ],
+      "events": [],
+      "connectors": []
+    },
+
+
+    {
+      "id": "gitago.TikTokLive.message_10",
+      "name": "TikTokLive Message 10",
+      "actions": [],
+      "states": [
+        {
+          "id": "gitago.TikTokLive.state.message_10.Username",
+          "type": "text",
+          "desc": "TikTok | Message 10 - Username ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_10.Userid",
+          "type": "text",
+          "desc": "TikTok | Message 10 - Userid ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_10.Message",
+          "type": "text",
+          "desc": "TikTok | Message 10 - Message ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_10.Followers",
+          "type": "text",
+          "desc": "TikTok | Message 10 - Followers ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_10.Followerrole",
+          "type": "text",
+          "desc": "TikTok | Message 10 - Followerrole ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_10.Avatar",
+          "type": "text",
+          "desc": "TikTok | Message 10 - Avatar ",
+          "default": ""
+        }
+      ],
+      "events": [],
+      "connectors": []
+    },
+
+
+    {
+      "id": "gitago.TikTokLive.message_11",
+      "name": "TikTokLive Message 11",
+      "actions": [],
+      "states": [
+        {
+          "id": "gitago.TikTokLive.state.message_11.Username",
+          "type": "text",
+          "desc": "TikTok | Message 11 - Username ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_11.Userid",
+          "type": "text",
+          "desc": "TikTok | Message 11 - Userid ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_11.Message",
+          "type": "text",
+          "desc": "TikTok | Message 11 - Message ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_11.Followers",
+          "type": "text",
+          "desc": "TikTok | Message 11 - Followers ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_11.Followerrole",
+          "type": "text",
+          "desc": "TikTok | Message 11 - Followerrole ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_11.Avatar",
+          "type": "text",
+          "desc": "TikTok | Message 11 - Avatar ",
+          "default": ""
+        }
+      ],
+      "events": [],
+      "connectors": []
+    },
+
+
+    {
+      "id": "gitago.TikTokLive.message_12",
+      "name": "TikTokLive Message 12",
+      "actions": [],
+      "states": [
+        {
+          "id": "gitago.TikTokLive.state.message_12.Username",
+          "type": "text",
+          "desc": "TikTok | Message 12 - Username ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_12.Userid",
+          "type": "text",
+          "desc": "TikTok | Message 12 - Userid ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_12.Message",
+          "type": "text",
+          "desc": "TikTok | Message 12 - Message ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_12.Followers",
+          "type": "text",
+          "desc": "TikTok | Message 12 - Followers ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_12.Followerrole",
+          "type": "text",
+          "desc": "TikTok | Message 12 - Followerrole ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_12.Avatar",
+          "type": "text",
+          "desc": "TikTok | Message 12 - Avatar ",
+          "default": ""
+        }
+      ],
+      "events": [],
+      "connectors": []
+    },
+
+
+    {
+      "id": "gitago.TikTokLive.message_13",
+      "name": "TikTokLive Message 13",
+      "actions": [],
+      "states": [
+        {
+          "id": "gitago.TikTokLive.state.message_13.Username",
+          "type": "text",
+          "desc": "TikTok | Message 13 - Username ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_13.Userid",
+          "type": "text",
+          "desc": "TikTok | Message 13 - Userid ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_13.Message",
+          "type": "text",
+          "desc": "TikTok | Message 13 - Message ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_13.Followers",
+          "type": "text",
+          "desc": "TikTok | Message 13 - Followers ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_13.Followerrole",
+          "type": "text",
+          "desc": "TikTok | Message 13 - Followerrole ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_13.Avatar",
+          "type": "text",
+          "desc": "TikTok | Message 13 - Avatar ",
+          "default": ""
+        }
+      ],
+      "events": [],
+      "connectors": []
+    },
+
+
+    {
+      "id": "gitago.TikTokLive.message_14",
+      "name": "TikTokLive Message 14",
+      "actions": [],
+      "states": [
+        {
+          "id": "gitago.TikTokLive.state.message_14.Username",
+          "type": "text",
+          "desc": "TikTok | Message 14 - Username ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_14.Userid",
+          "type": "text",
+          "desc": "TikTok | Message 14 - Userid ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_14.Message",
+          "type": "text",
+          "desc": "TikTok | Message 14 - Message ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_14.Followers",
+          "type": "text",
+          "desc": "TikTok | Message 14 - Followers ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_14.Followerrole",
+          "type": "text",
+          "desc": "TikTok | Message 14 - Followerrole ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_14.Avatar",
+          "type": "text",
+          "desc": "TikTok | Message 14 - Avatar ",
+          "default": ""
+        }
+      ],
+      "events": [],
+      "connectors": []
+    },
+
+
+    {
+      "id": "gitago.TikTokLive.message_15",
+      "name": "TikTokLive Message 15",
+      "actions": [],
+      "states": [
+        {
+          "id": "gitago.TikTokLive.state.message_15.Username",
+          "type": "text",
+          "desc": "TikTok | Message 15 - Username ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_15.Userid",
+          "type": "text",
+          "desc": "TikTok | Message 15 - Userid ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_15.Message",
+          "type": "text",
+          "desc": "TikTok | Message 15 - Message ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_15.Followers",
+          "type": "text",
+          "desc": "TikTok | Message 15 - Followers ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_15.Followerrole",
+          "type": "text",
+          "desc": "TikTok | Message 15 - Followerrole ",
+          "default": ""
+        },
+        {
+          "id": "gitago.TikTokLive.state.message_15.Avatar",
+          "type": "text",
+          "desc": "TikTok | Message 15 - Avatar ",
+          "default": ""
+        }
+      ],
+      "events": [],
+      "connectors": []
+    },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     {
       "id": "gitago.TikTokLive.top_viewer",
       "name": "TikTokLive Top 5 Viewers",
