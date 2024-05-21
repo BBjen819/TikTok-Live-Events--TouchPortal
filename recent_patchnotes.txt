@@ -1,2 +1,6 @@
-Updated to support macOS & Linux
-Please update to remove notifcation.
+Upgraded to 15 messages
+Removed addlisteners broken
+Added listenert differently
+Upgraded dependencies
+Added detection of errors from self.startup
+Might have some french words in the code sorry about that.
