@@ -2,11 +2,14 @@
 
 import asyncio
 from typing import Optional, List, Callable, Dict
+#TikTokLive                6.0.6
+#touchportal-api           1.7.10
+#typing_extensions         4.11.0
 from TikTokLive import TikTokLiveClient
-from TikTokLive.types import FailedConnection, FailedParseUserHTML, FailedFetchRoomInfo, AlreadyConnecting
-from TikTokLive.types.events import CommentEvent, ConnectEvent, FollowEvent, ShareEvent, MoreShareEvent, LikeEvent, JoinEvent, GiftEvent, LiveEndEvent, ViewerUpdateEvent
-from TikTokLive import types
+from TikTokLive.events import * #CommentEvent, ConnectEvent, FollowEvent, ShareEvent, LikeEvent, JoinEvent, GiftEvent, LiveEndEvent
+from TikTokLive.client.errors import * #UserOfflineError, WebsocketURLMissingError, InitialCursorMissingError, AlreadyConnectedError
 import threading
+import requests
 
 import sys
 import time
@@ -40,16 +43,21 @@ try:
         updateStatesOnBroadcast = False,  # do not spam TP with state updates on every page change
     )
 except Exception as e:
+    print(f"TPClient Error: {e}")
     sys.exit(f"Could not create TP Client, exiting. Error was:\n{repr(e)}")
-
-
-
-
+    
 
 def handleSettings(settings, on_connect=False):
     settings = { list(settings[i])[0] : list(settings[i].values())[0] for i in range(len(settings)) }
     autoConnect = settings.get('Auto Connect', False)
+    #-------------------------------------------------------------------DEBUG USER BYPASS-------------------------------------------------------
+    #-------------------------------------------------------------------DEBUG USER BYPASS-------------------------------------------------------
+    #-------------------------------------------------------------------DEBUG USER BYPASS-------------------------------------------------------
+    #-------------------------------------------------------------------DEBUG USER BYPASS-------------------------------------------------------
+    #-------------------------------------------------------------------DEBUG USER BYPASS-------------------------------------------------------
+    #tk.Username = "@name"
     tk.Username = settings.get('TikTok Username')
+
     if autoConnect == "True":
         if tk.Username != "":
             tk.startup = True
@@ -126,72 +134,161 @@ def onShutdown(data):
     g_log.info('Received shutdown event from TP Client.')
     # We do not need to disconnect manually because we used `autoClose = True`
 
-
-
-
-
-
-
-
-
-
 class TikTok_Client:
     def __init__(self,) -> None:
+        #self.TikTokLive: TikTokLive = None
         self.tiktok: TikTokLiveClient = None
         self.isalive = False
         self.startup = False
         self.Username = None
         self.thread = None
         self.prev_viewer_count = 0
-        self.last_5_messages = deque(maxlen=5)
+        self.last_5_messages = deque(maxlen=15)
 
 
     def set_client(self, tiktok_channel):
-        self.tiktok = TikTokLiveClient(tiktok_channel, **{
-            "process_initial_data": False  # Spams cached messages on start, must be disabled   
-        })
-        g_log.info("Adding Listeners")
-        
-        self.tiktok.add_listener("comment", self.on_comment)
-        self.tiktok.add_listener("follow", self.on_follow)
-        self.tiktok.add_listener("like", self.on_like)
-        self.tiktok.add_listener("share", self.on_share)
-        self.tiktok.add_listener("join", self.on_join)
-        self.tiktok.add_listener("gift", self.on_gift)
-        self.tiktok.add_listener("viewer_update", self.on_viewercountUpdate)
-        self.tiktok.add_listener("connect", self.on_connect)
-        self.tiktok.add_listener("disconnect", self.on_disconnect)
-        self.tiktok.add_listener("live_end", self.on_disconnect)
+        self.tiktok = TikTokLiveClient(tiktok_channel)
+
+        #---------------------------------------CONNECT EVENT---------------------------------------
+        g_log.info("Adding Listeners ConnectEvent")  
+        @self.tiktok.on(ConnectEvent)
+        async def on_connect(event: ConnectEvent):
+            g_log.debug(f"Connected to @{event.unique_id}!")
+
+        #---------------------------------------GIFT EVENT---------------------------------------
+        g_log.info("Adding Listeners GiftEvent")  
+        @self.tiktok.on(GiftEvent)
+        async def on_gift(event: GiftEvent):
+            # When a gift is sent to user
+            # - Updates associated TouchPortal States
+            if event.gift.streakable and not event.streaking:
+                g_log.info(f"{event.user.unique_id} sent {event.repeat_count}x \"{event.gift.name}\"")
+            # It's not type 1, which means it can't have a streak & is automatically over
+            elif event.gift.type != 1:
+                message: str = f"{event.user.unique_id} sent \"{event.gift.name}\""
+                g_log.info(message)
+                #TPClient.stateUpdate(PLUGIN_ID + ".state.Recent.Gift.GiftName", str(event.gift.name))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newGift", "True")
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newGift.GiftID",   str(event.gift_id))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newGift.TotalGifts",   str(event.repeat_count))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newGift.GiftName",     str(event.gift.name))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newGift.Name",         str(event.user.nickname))
+            #print(f"{event.user.nickname}: {event.gift.name} x{event.repeat_count}")
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newGift", "False")    
+
+        #---------------------------------------COMMENT EVENT---------------------------------------
+        g_log.info("Adding Listeners CommentEvent")  
+        @self.tiktok.on(CommentEvent)
+        async def on_comment(event: CommentEvent):
+            g_log.info(f"{event.user.nickname} -> {event.comment}")
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newComment", "True")
+            #TPClient.stateUpdate(PLUGIN_ID + ".state.nweJoin.Avatar",   str(event.user.avatar_thumb.url_list[0]))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newComment.Followers",str(event.user.is_follower))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newComment.Comment",     str(event.comment))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newComment.Name",     str(event.user.nickname))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newComment.UserId",   str(event.user.id))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newComment", "False")
+
+            #keeping only the last 15 messages in a variable at any given time.. 
+            self.last_5_messages.append({'nickname': event.user.nickname, 
+                                         'comment': event.comment,
+                                         'display_id': event.user.display_id,
+                                         'follower_count': event.user.follow_info.follower_count,
+                                         'user_role': event.user.user_role,
+                                         'avatar': event.user.avatar_thumb.url_list[0]})
+            self.update_message_states(event)
+
+        #---------------------------------------JOIN EVENT---------------------------------------
+        @self.tiktok.on(JoinEvent)
+        async def on_join(event: JoinEvent):
+            g_log.debug(f"JOIN: {event.user.nickname}")
+            #print(f"Join: {event.user.nickname}")
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newJoin", "True")
+            #TPClient.stateUpdate(PLUGIN_ID + ".state.nweJoin.Avatar",   str(event.user.avatar_thumb.url_list[0]))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newJoin.Followers",str(event.user.is_follower))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newJoin.Name",     str(event.user.nickname))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newJoin.UserId",   str(event.user.id))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newJoin", "False")
+            
+        #---------------------------------------FOLLOW EVENT---------------------------------------
+        @self.tiktok.on(FollowEvent)
+        async def on_follow(event: FollowEvent):
+            #print(f"New Follow: {event.user.nickname}")
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newFollower", "True")
+            TPClient.stateUpdate(PLUGIN_ID + ".state.follower_count", str(event.follow_count))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newFollower.Name",     str(event.user.nickname))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newFollower.UserID",   str(event.user.id))
+            #TPClient.stateUpdate(PLUGIN_ID + ".state.newFollower.Avatar",   str(event.user.id))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newFollower.Followers",str(event.user.is_follower))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newFollower", "False")
+            #self.update_userStates(event, eventType)
+
+        #---------------------------------------LIKE EVENT---------------------------------------
+        @self.tiktok.on(LikeEvent)
+        async def on_like(event: LikeEvent):
+            #print(f"New Like: {event.user.nickname}")
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newLike", "True")
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newLike.TimesLiked", str("?"))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newLike.Name",str(event.user.nickname))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newLike.UserID",str(event.user.id))
+            #TPClient.stateUpdate(PLUGIN_ID + ".state.newLike.Avatar",   str(event.user.id))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newLike.Followers",str(event.user.is_follower))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newLike", "False")
+
+        #---------------------------------------SHARE EVENT---------------------------------------
+        @self.tiktok.on(ShareEvent)
+        async def on_share(event: ShareEvent):
+            #print(f"New Share: {event.user.nickname}")
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newShare", "True")
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newShare.Name",str(event.user.nickname))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newShare.UserID",str(event.user.id))
+            #TPClient.stateUpdate(PLUGIN_ID + ".state.newShare.Avatar",   str(event.user.id))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newShare.Followers",str(event.user.is_follower))
+            TPClient.stateUpdate(PLUGIN_ID + ".state.newShare", "False")
         g_log.info("Starting TikTok Live Chat")
         return self.tiktok
     
-
     def start_tiktok(self):
-        max_retry_interval = 45  # Maximum retry interval in seconds
-        min_retry_interval = 2   # Minimum retry interval in seconds
+        max_retry_interval = 120  # Maximum retry interval in seconds
+        min_retry_interval = 60   # Minimum retry interval in seconds
         retry_interval = min_retry_interval
         retry_attempt = 0
 
         while True:
             if self.startup:
                 try:
-                    attempt = tk.tiktok.run()
+                    g_log.info("Tiktok self.startup")
+                    attempt = self.tiktok.run()
+                    g_log.info(f"Tiktok attempt {attempt}")
                     if attempt:
                         break  # Break out of the loop if the connection is successful
-                except FailedConnection:
-                    g_log.info("Failed to connect to TikTok. Trying Again...")
-                except FailedParseUserHTML as e:
-                    g_log.info("Failed to parse user HTML (User might be offline). Trying Again...")
-                    g_log.info(f"Error message: {e}")
-                except FailedFetchRoomInfo as e:
-                    g_log.info("Failed to fetch room info. Trying Again...")
-                except AlreadyConnecting as e:
-                    g_log.info("Attempting to Connect, Trying Again...")            
+                except TimeoutError:
+                    g_log.info("Failed to connect to TikTok. TimeoutError...")  
+                    self.stop_TikTok_Thread()
+                except UserOfflineError:
+                    g_log.info("Failed to connect to TikTok. UserOfflineError...")  
+                    self.stop_TikTok_Thread()
+                except AlreadyConnectedError:
+                    g_log.info("Failed to connect to TikTok. AlreadyConnectedError...")
+                except Exception as e:
+                    foundError = False
+                    strError = str(e)
+                    if (strError =="string indices must be integers, not 'str'"):
+                        print(f"Exception Error: Bad user name")
+                        foundError = True
+                    if (strError[0:12]=="[RATE_LIMIT]"): #[RATE_LIMIT] You have hit the rate limit for starting connections. Try again in 914 seconds. Catch this error & access its attributes (retry_after, reset_time) for data on when you can request next.
+                        print(f"Exception Error: RATE_LIMIT")
+                        foundError = True
+                    if (strError[0:14]=="[SIGN_NOT_200]"): #[SIGN_NOT_200] Failed request to Sign API with status code 500 and payload "b'{"code":500,"error":"API failed with a timeout error."}'".
+                        print(f"Exception Error: Sign API error")
+                        foundError = True
+                    if (foundError == False):    
+                        print(f"Exception Error: {e}")
+
             retry_attempt += 1
             retry_interval = min_retry_interval + retry_attempt 
             retry_interval = min(retry_interval, max_retry_interval)
             time.sleep(retry_interval)
-
 
     def stop_TikTok_Thread(self):
         try:
@@ -209,7 +306,7 @@ class TikTok_Client:
         
     def update_userAvatar(self, event, type):
         try:
-            for x in event.user.avatar.urls:
+            for x in event.user.avatar_thumb.url_list:
                 if "shrink" not in x.lower():
                     base64_data = convert_image_to_base64(x)
                     if base64_data:
@@ -218,181 +315,29 @@ class TikTok_Client:
         except TypeError as e:
             print(e)
     
-    def update_message_states(self,event):
+    def update_message_states(self,event:CommentEvent):
+        #g_log.info("Event: ", event.user.nickname)
+        #quit()
+        #print(f"Event de update_message_states: {event}")
         for index, message in enumerate(self.last_5_messages):
-            TPClient.createState(PLUGIN_ID + f".state.message_{index + 1}.Username", f"Message_{index + 1} - Username", str(message['nickname']))
-            TPClient.createState(PLUGIN_ID + f".state.message_{index + 1}.Message", f"Message_{index + 1} - Message", str(message['comment']))
-            TPClient.createState(PLUGIN_ID + f".state.message_{index + 1}.UserID", f"Message_{index + 1} - UserID", str(event.user.user_id))
-            TPClient.createState(PLUGIN_ID + f".state.message_{index + 1}.Followers", f"Message_{index + 1} - Followers", str(event.user.info.followers))
-            TPClient.createState(PLUGIN_ID + f".state.message_{index + 1}.FollowerRole", f"Message_{index + 1} - FollowerRole", str(event.user.info.follow_role))
-
-            ## do avatar later
-            #  TPClient.createState(PLUGIN_ID + f".act.message_{index + 1}.Avatar", f"Message_{index + 1} - Avatar", str(event.user.avatar.urls[0]))
-
-    
-    async def update_states_from_events(self, event, eventType):        
-        if eventType == "Like":
-            TPClient.stateUpdate(PLUGIN_ID + ".state.newLike", "True")
-            TPClient.stateUpdate(PLUGIN_ID + f".state.{eventType}_count", str(event.total_likes))
-            TPClient.stateUpdate(PLUGIN_ID + ".state.newLike.TimesLiked", str(event.likes))
-            TPClient.stateUpdate(PLUGIN_ID + ".state.like_count", str(event.total_likes))
-            TPClient.stateUpdate(PLUGIN_ID + ".state.newLike", "False")
-            self.update_userStates(event, eventType)
-
-        
-        if eventType == "Gift":
-            TPClient.stateUpdate(PLUGIN_ID + ".state.newGift", "True")
-            TPClient.stateUpdate(PLUGIN_ID + ".state.Recent.Gift.GiftID", str(event.gift.id))
-            TPClient.stateUpdate(PLUGIN_ID + ".state.newGift.TotalGifts", str(event.gift.count))
-            TPClient.stateUpdate(PLUGIN_ID + ".state.newGift.GiftName", str(event.gift.info.name))
-            TPClient.stateUpdate(PLUGIN_ID + ".state.newGift", "False")
-            self.update_userStates(event, eventType)
-
-          #base_64_gift = convert_image_to_base64(event.gift.info.urls[0])
-          #if base_64_gift:
-          #    TPClient.stateUpdate(PLUGIN_ID + ".state.newGift.Avatar", base_64_gift)
-
-        
-        if eventType == "Follower":
-           # print("Follow event", event)
-            TPClient.stateUpdate(PLUGIN_ID + ".state.newFollower", "True")
-            TPClient.stateUpdate(PLUGIN_ID + ".state.follower_count", str(event.total_followers))
-            TPClient.stateUpdate(PLUGIN_ID + ".state.newFollower", "False")
-            self.update_userStates(event, eventType)
-
-        if eventType == "Share":
-            TPClient.stateUpdate(PLUGIN_ID + ".state.newShare", "True")
-            TPClient.stateUpdate(PLUGIN_ID + ".state.newShare", "False")
-            self.update_userStates(event, eventType)
-
-        if eventType == "Join":
-            #print("Join event", event)
-            ## Do we care about join events?
-            pass
-
+            #print(f"{index} = {message}")
+            TPClient.createState(PLUGIN_ID + f".state.message_{index + 1}.Username",        f"Message_{index + 1} - Username",      str(message['nickname']))
+            TPClient.createState(PLUGIN_ID + f".state.message_{index + 1}.Message",         f"Message_{index + 1} - Message",       str(message['comment']))
+            TPClient.createState(PLUGIN_ID + f".state.message_{index + 1}.UserID",          f"Message_{index + 1} - UserID",        str(message['display_id']))
+            TPClient.createState(PLUGIN_ID + f".state.message_{index + 1}.Followers",       f"Message_{index + 1} - Followers",     str(message['follower_count']))
+            TPClient.createState(PLUGIN_ID + f".state.message_{index + 1}.FollowerRole",    f"Message_{index + 1} - FollowerRole",  str(message['user_role']))
+            TPClient.createState(PLUGIN_ID + f".state.message_{index + 1}.Avatar",            f"Message_{index + 1} - Avatar",      str(message['avatar']))
 
     def update_userStates(self, event, type):
         """ Updates the basic user info for specified event & userAvatar """
-        TPClient.stateUpdate(PLUGIN_ID + f".state.new{type}.Name", str(event.user.nickname))
-        TPClient.stateUpdate(PLUGIN_ID + f".state.new{type}.UserID", str(event.user.user_id))
-        TPClient.stateUpdate(PLUGIN_ID + f".state.new{type}.Followers", str(event.user.info.followers))
+        TPClient.stateUpdate(PLUGIN_ID + f".state.new{type}.Name",      str(event.user.nickname))
+        TPClient.stateUpdate(PLUGIN_ID + f".state.new{type}.UserID",    str(event.user.id))
+        TPClient.stateUpdate(PLUGIN_ID + f".state.new{type}.Followers", str(event.user.is_follower))
         self.update_userAvatar(event, type)
 
-
-
-
-
-    async def on_connect(self, event: ConnectEvent):
-        """ 
-        When the Streamer connects to TikTok Live Chat
-        """
-        g_log.info("Connected to Room ID: %s", tk.tiktok.room_id)
-        room_info = await tk.tiktok.retrieve_room_info()
-        TPClient.stateUpdate(PLUGIN_ID + ".state.ShareURL", str(room_info['share_url']))
-
-
     def on_disconnect(eself, event: LiveEndEvent):
-        """ 
-        When the Streamer disconnects from TikTok Live Chat
-        """
         g_log.info("Disconnected from TikTok Live Chat")
         tk.stop_TikTok_Thread()
-
-
-
-    async def on_comment(self, event: CommentEvent):
-        """ 
-        Called when a comment is received
-        - Updates associated TouchPortal States
-        """
-        g_log.debug(f"{event.user.nickname} -> {event.comment}")
-        #keeping only the last 5 messages in a variable at any given time.. 
-        tk.last_5_messages.append({'nickname': event.user.nickname, 'comment':event.comment})
-        tk.update_message_states(event)
-
-
-
-
-    async def on_follow(self, event: FollowEvent):
-        """
-        When a user follows the stream
-        """
-        message: str = f"{event.user.user_id} followed!{event.user.user_id}"
-        g_log.debug(message)
-        await tk.update_states_from_events(event, "Follower")
-
-
-
-    async def on_like(self, event: LikeEvent):
-        """ 
-        When a user likes the stream
-        - Updates associated TouchPortal States
-        """
-        message: str = f"{event.user.user_id} liked the stream {event.likes} times, there is now {event.total_likes} total likes!"
-        g_log.debug(message)
-        await tk.update_states_from_events(event, "Like")
-
-
-
-    async def on_share(self, event: ShareEvent):
-        """ 
-        When a user shares the stream
-        - Updates associated TouchPortal States
-        """
-        message: str = f"{event.user.user_id} shared the streamer!"
-        g_log.debug(message)
-        await tk.update_states_from_events(event, "Share")
-
-
-
-    async def on_join(self, event: JoinEvent):
-        """ 
-        When a user joins the room
-        - Updates associated TouchPortal States
-        """
-        await tk.update_states_from_events(event, "Join")
-
-
-
-    async def on_gift(self, event: GiftEvent):
-        """ 
-        When a gift is sent to user
-        - Updates associated TouchPortal States
-        """
-        if event.gift.info.type == 1 and event.gift.repeat_end == 1:
-            g_log.debug(f"{event.user.user_id} sent {event.gift.count}x \"{event.gift.info.name}\"")
-
-        # It's not type 1, which means it can't have a streak & is automatically over
-        elif event.gift.info.type != 1:
-            message: str = f"{event.user.user_id} sent \"{event.gift.info.name}\""
-            g_log.debug(message)
-            TPClient.stateUpdate(PLUGIN_ID + ".state.Recent.Gift.GiftName", str(event.gift.info.name))
-
-        await tk.update_states_from_events(event, "Gift")
-
-
-
-
-    async def on_viewercountUpdate(self, event: ViewerUpdateEvent):
-        """
-        Called when the viewer count changes
-        - Updates associated TouchPortal States
-        """
-        TPClient.stateUpdate(PLUGIN_ID + ".state.viewer_count", str(event.viewer_count))
-        for x in event.top_viewers[0:5]:
-            TPClient.createState(PLUGIN_ID + f".state.top_viewer_{event.top_viewers.index(x) + 1}.Name",
-                                f"Top Viewer {event.top_viewers.index(x) + 1} - Name",
-                                str(x.user.nickname),
-                                "Top 5 Viewers")
-            TPClient.createState(PLUGIN_ID + f".state.top_viewer_{event.top_viewers.index(x) + 1}.UserID",
-                                f"Top Viewer {event.top_viewers.index(x) + 1} - UserID",
-                                str(x.user.user_id),
-                                "Top 5 Viewers")
-            TPClient.createState(PLUGIN_ID + f".state.top_viewer_{event.top_viewers.index(x) + 1}.CoinsGiven",
-                                f"Top Viewer {event.top_viewers.index(x) + 1} - CoinsGiven",
-                                str(x.coins_given),
-                                "Top 5 Viewers")
-    
 
 ## Main
 def main():
@@ -405,16 +350,11 @@ def main():
     logStream = sys.stdout
     
     parser = ArgumentParser(fromfile_prefix_chars='@')
-    parser.add_argument("-d", action='store_true',
-                        help="Use debug logging.")
-    parser.add_argument("-w", action='store_true',
-                        help="Only log warnings and errors.")
-    parser.add_argument("-q", action='store_true',
-                        help="Disable all logging (quiet).")
-    parser.add_argument("-l", metavar="<logfile>",
-                        help=f"Log file name (default is '{logFile}'). Use 'none' to disable file logging.")
-    parser.add_argument("-s", metavar="<stream>",
-                        help="Log to output stream: 'stdout' (default), 'stderr', or 'none'.")
+    parser.add_argument("-d", action='store_true',  help="Use debug logging.")
+    parser.add_argument("-w", action='store_true',  help="Only log warnings and errors.")
+    parser.add_argument("-q", action='store_true',  help="Disable all logging (quiet).")
+    parser.add_argument("-l", metavar="<logfile>",  help=f"Log file name (default is '{logFile}'). Use 'none' to disable file logging.")
+    parser.add_argument("-s", metavar="<stream>",   help="Log to output stream: 'stdout' (default), 'stderr', or 'none'.")
 
     # this processes the actual command line and populates the `opts` dict.
     opts = parser.parse_args()
@@ -462,8 +402,6 @@ def main():
     g_log.info(f"{TP_PLUGIN_INFO['name']} stopped.")
     return ret
 
-
-
 def convert_image_to_base64(image_url):
     try:
         response = requests.get(image_url)
@@ -478,13 +416,10 @@ def convert_image_to_base64(image_url):
         print(f"Error: {e}")
         return None
 
-
-
 def run_tk():
-    """
-    Started when the plugin is loaded and username is present in Plugin Settings
-    - Also Can be Started Manually by User
-    """
+    # Started when the plugin is loaded and username is present in Plugin Settings
+    # - Also Can be Started Manually by User
+    
     tk.thread = threading.Thread(target=tk.start_tiktok)
     if tk.isalive:
         g_log.info("TikTok thread is already running.")
@@ -492,20 +427,9 @@ def run_tk():
         g_log.info("Starting TikTok thread.")
         tk.thread.start()
 
-
-
 if __name__ == "__main__":
     tk = TikTok_Client()
     tk.stop_TikTok_Thread()
     result = main()
     tk.stop_TikTok_Thread()
-    tk.tiktok.stop()
     sys.exit(main())
-
-
-
-
-
-
-
-
